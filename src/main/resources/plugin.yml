@@ -22,9 +22,13 @@ commands:
   modify_model:
     description: Modify model
     permission: spider-animation.modify_model
+    aliases:
+      - model_change
   torso_model:
     description: Set the torso model of the spider
-    permission: spider-animation.body_model
+    permission: spider-animation.torso_model
+    aliases:
+      - body_model
   leg_model:
     description: Set the leg model of the spider
     permission: spider-animation.leg_model
@@ -34,11 +38,29 @@ commands:
   set_sound:
     description: Set the sound of the spider
     permission: spider-animation.set_sound
+    aliases:
+      - sound
   splay:
     description: Splay
     permission: spider-animation.splay
 
 permissions:
+  spider-animation.*:
+    description: Allows access to all Spider Animation commands
+    default: op
+    children:
+      spider-animation.items: true
+      spider-animation.options: true
+      spider-animation.fall: true
+      spider-animation.preset: true
+      spider-animation.scale: true
+      spider-animation.modify_model: true
+      spider-animation.torso_model: true
+      spider-animation.body_model: true
+      spider-animation.leg_model: true
+      spider-animation.animated_palette: true
+      spider-animation.set_sound: true
+      spider-animation.splay: true
   spider-animation.items:
     description: Allows access to the items command
     default: op
@@ -60,6 +82,11 @@ permissions:
   spider-animation.torso_model:
     description: Allows access to the torso_model command
     default: op
+  spider-animation.body_model:
+    description: Legacy alias for the torso_model command permission
+    default: op
+    children:
+      spider-animation.torso_model: true
   spider-animation.leg_model:
     description: Allows access to the leg_model command
     default: op
