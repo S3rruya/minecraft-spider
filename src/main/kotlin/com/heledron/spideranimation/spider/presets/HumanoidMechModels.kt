@@ -49,10 +49,10 @@ object HumanoidMechModels {
 
     fun legSegments(lengthScale: Double): List<SegmentPlan> {
         return listOf(
-            SegmentPlan(0.22 * lengthScale, direction(0.0, -0.25, 0.20)),
-            SegmentPlan(0.78 * lengthScale, direction(0.0, -0.95, 0.25)),
-            SegmentPlan(0.78 * lengthScale, direction(0.0, -0.95, -0.15)),
-            SegmentPlan(0.40 * lengthScale, direction(0.0, -0.10, 0.95)),
+            SegmentPlan(0.16 * lengthScale, direction(0.0, -0.45, 0.12)),
+            SegmentPlan(0.66 * lengthScale, direction(0.0, -0.98, 0.18)),
+            SegmentPlan(0.70 * lengthScale, direction(0.0, -0.99, -0.08)),
+            SegmentPlan(0.30 * lengthScale, direction(0.0, -0.08, 0.98)),
         )
     }
 

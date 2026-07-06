@@ -105,8 +105,8 @@ fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
 
     options.bodyPlan.bodyModel = HumanoidMechModels.body()
     options.bodyPlan.addLegPair(
-        root = Vector(.34, -.64, .02),
-        rest = Vector(.42, .0, .22),
+        root = Vector(.30, -.42, .02),
+        rest = Vector(.34, .0, .12),
         segments = HumanoidMechModels.legSegments(legLengthScale)
     )
 
@@ -118,7 +118,7 @@ fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
     options.walkGait = Gait.defaultBipedWalk()
     options.gallopGait = Gait.defaultBipedRun()
 
-    options.bodyPlan.scale(1.15)
+    options.bodyPlan.scale(1.05)
 
     return options
 }

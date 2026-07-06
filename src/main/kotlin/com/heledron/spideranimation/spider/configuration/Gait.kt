@@ -49,47 +49,51 @@ class Gait(
         }
 
         fun defaultBipedWalk() = Gait(.11, GaitType.BIPED).apply {
-            stationary.bodyHeight = 1.55
-            stationary.triggerZone = SplitDistance(.35, 1.6)
-            moving.bodyHeight = 1.45
-            moving.triggerZone = SplitDistance(.95, 1.7)
-            maxBodyDistanceFromGround = .35
+            stationary.bodyHeight = 2.2
+            stationary.triggerZone = SplitDistance(.32, 2.2)
+            moving.bodyHeight = 2.12
+            moving.triggerZone = SplitDistance(.72, 2.25)
+            maxBodyDistanceFromGround = .55
             moveAcceleration = .15 / 6
-            legMoveSpeed = .22
-            legLiftHeight = .45
-            legDropDistance = .25
-            comfortZone = SplitDistance(1.55, 2.0)
-            legLookAheadFraction = .9
+            legMoveSpeed = .24
+            legLiftHeight = .34
+            legDropDistance = .20
+            comfortZone = SplitDistance(1.05, 2.45)
+            bodyHeightCorrectionAcceleration = gravityAcceleration * 7
+            bodyHeightCorrectionFactor = .4
+            legLookAheadFraction = .65
             samePairCooldown = 4
             crossPairCooldown = 6
             disableAdvancedRotation = true
             scanPivotMode = PivotMode.YAxis
             legChainPivotMode = PivotMode.YAxis
-            legStraightenRotation = (-10f).toRadians()
-            polygonLeeway = .35
-            stabilizationFactor = .35
+            legStraightenRotation = (-2f).toRadians()
+            polygonLeeway = .65
+            stabilizationFactor = .75
         }
 
         fun defaultBipedRun() = Gait(.28, GaitType.BIPED).apply {
-            stationary.bodyHeight = 1.55
-            stationary.triggerZone = SplitDistance(.35, 1.6)
-            moving.bodyHeight = 1.7
-            moving.triggerZone = SplitDistance(1.15, 1.8)
-            maxBodyDistanceFromGround = .4
+            stationary.bodyHeight = 2.2
+            stationary.triggerZone = SplitDistance(.32, 2.2)
+            moving.bodyHeight = 2.25
+            moving.triggerZone = SplitDistance(.92, 2.35)
+            maxBodyDistanceFromGround = .6
             moveAcceleration = .15 / 5
-            legMoveSpeed = .36
-            legLiftHeight = .55
-            legDropDistance = .28
-            comfortZone = SplitDistance(1.75, 2.1)
-            legLookAheadFraction = 1.0
+            legMoveSpeed = .34
+            legLiftHeight = .42
+            legDropDistance = .24
+            comfortZone = SplitDistance(1.25, 2.55)
+            bodyHeightCorrectionAcceleration = gravityAcceleration * 8
+            bodyHeightCorrectionFactor = .45
+            legLookAheadFraction = .8
             samePairCooldown = 3
             crossPairCooldown = 5
             disableAdvancedRotation = true
             scanPivotMode = PivotMode.YAxis
             legChainPivotMode = PivotMode.YAxis
-            legStraightenRotation = (-10f).toRadians()
-            polygonLeeway = .45
-            stabilizationFactor = .45
+            legStraightenRotation = (-2f).toRadians()
+            polygonLeeway = .75
+            stabilizationFactor = .8
             uncomfortableSpeedMultiplier = .45
         }
     }
