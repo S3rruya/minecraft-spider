@@ -47,6 +47,49 @@ class Gait(
             crossPairCooldown = 4
             polygonLeeway = .5
         }
+
+        fun defaultBipedWalk() = Gait(.11, GaitType.BIPED).apply {
+            stationary.bodyHeight = 1.55
+            stationary.triggerZone = SplitDistance(.35, 1.6)
+            moving.bodyHeight = 1.45
+            moving.triggerZone = SplitDistance(.95, 1.7)
+            maxBodyDistanceFromGround = .35
+            moveAcceleration = .15 / 6
+            legMoveSpeed = .22
+            legLiftHeight = .45
+            legDropDistance = .25
+            comfortZone = SplitDistance(1.55, 2.0)
+            legLookAheadFraction = .9
+            samePairCooldown = 4
+            crossPairCooldown = 6
+            disableAdvancedRotation = true
+            scanPivotMode = PivotMode.YAxis
+            legChainPivotMode = PivotMode.YAxis
+            polygonLeeway = .35
+            stabilizationFactor = .35
+        }
+
+        fun defaultBipedRun() = Gait(.28, GaitType.BIPED).apply {
+            stationary.bodyHeight = 1.55
+            stationary.triggerZone = SplitDistance(.35, 1.6)
+            moving.bodyHeight = 1.7
+            moving.triggerZone = SplitDistance(1.15, 1.8)
+            maxBodyDistanceFromGround = .4
+            moveAcceleration = .15 / 5
+            legMoveSpeed = .36
+            legLiftHeight = .55
+            legDropDistance = .28
+            comfortZone = SplitDistance(1.75, 2.1)
+            legLookAheadFraction = 1.0
+            samePairCooldown = 3
+            crossPairCooldown = 5
+            disableAdvancedRotation = true
+            scanPivotMode = PivotMode.YAxis
+            legChainPivotMode = PivotMode.YAxis
+            polygonLeeway = .45
+            stabilizationFactor = .45
+            uncomfortableSpeedMultiplier = .45
+        }
     }
 
     fun scale(scale: Double) {

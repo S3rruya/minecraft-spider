@@ -1,6 +1,7 @@
 package com.heledron.spideranimation.spider.presets
 
 import com.heledron.spideranimation.spider.configuration.BodyPlan
+import com.heledron.spideranimation.spider.configuration.Gait
 import com.heledron.spideranimation.spider.configuration.LegPlan
 import com.heledron.spideranimation.spider.configuration.SegmentPlan
 import com.heledron.spideranimation.spider.configuration.SpiderOptions
@@ -115,19 +116,8 @@ fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
     options.bodyPlan.eyePalette = AnimatedPalettes.MECH_EYES.palette
     options.bodyPlan.blinkingPalette = AnimatedPalettes.MECH_BLINKING_LIGHTS.palette
 
-    options.walkGait.maxSpeed = .11
-    options.walkGait.moveAcceleration = .15 / 6
-    options.walkGait.legMoveSpeed = .22
-    options.walkGait.stationary.bodyHeight = 1.55
-    options.walkGait.moving.bodyHeight = 1.45
-    options.walkGait.comfortZone = options.walkGait.comfortZone.scale(1.2)
-
-    options.gallopGait.maxSpeed = .28
-    options.gallopGait.moveAcceleration = .15 / 5
-    options.gallopGait.legMoveSpeed = .36
-    options.gallopGait.stationary.bodyHeight = 1.55
-    options.gallopGait.moving.bodyHeight = 1.7
-    options.gallopGait.comfortZone = options.gallopGait.comfortZone.scale(1.2)
+    options.walkGait = Gait.defaultBipedWalk()
+    options.gallopGait = Gait.defaultBipedRun()
 
     options.bodyPlan.scale(1.25)
 

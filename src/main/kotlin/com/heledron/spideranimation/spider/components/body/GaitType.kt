@@ -2,7 +2,8 @@ package com.heledron.spideranimation.spider.components.body
 
 enum class GaitType(val canMoveLeg: (Leg) -> Boolean, val getLegsInUpdateOrder: (SpiderBody) -> List<Leg>) {
     WALK(WalkGaitType::canMoveLeg, WalkGaitType::getLegsInUpdateOrder),
-    GALLOP(GallopGaitType::canMoveLeg, GallopGaitType::getLegsInUpdateOrder)
+    GALLOP(GallopGaitType::canMoveLeg, GallopGaitType::getLegsInUpdateOrder),
+    BIPED(BipedGaitType::canMoveLeg, BipedGaitType::getLegsInUpdateOrder)
 }
 
 object WalkGaitType {
@@ -76,6 +77,44 @@ object GallopGaitType {
             val hasCooldown = pair.target.isGrounded && (pair.timeSinceBeginMove < spider.gait.samePairCooldown)
             return pair.isMoving && !hasCooldown
         }
+    }
+}
+
+object BipedGaitType {
+    fun getLegsInUpdateOrder(spider: SpiderBody): List<Leg> {
+        if (spider.legs.size != 2) return WalkGaitType.getLegsInUpdateOrder(spider)
+
+        return spider.legs.sortedWith(
+            compareByDescending<Leg> { it.wantsBipedStep() }
+                .thenByDescending { it.timeSinceStopMove }
+        )
+    }
+
+    fun canMoveLeg(leg: Leg): Boolean {
+        val spider = leg.spider
+        if (spider.legs.size != 2) return WalkGaitType.canMoveLeg(leg)
+
+        if (!leg.target.isGrounded) return true
+
+        leg.isPrimary = true
+
+        val wantsToMove = leg.wantsBipedStep()
+        val alreadyAtTarget = leg.endEffector.distanceSquared(leg.target.position) < 0.01
+        val onGround = spider.legs.any { it.isGrounded() } || spider.onGround
+        if (!wantsToMove || alreadyAtTarget || !onGround) return false
+
+        val supportLeg = spider.legs.firstOrNull { it !== leg && !it.isDisabled } ?: return true
+        if (supportLeg.target.isGrounded && !supportLeg.isGrounded()) return false
+        if (supportLeg.timeSinceStopMove < spider.gait.crossPairCooldown) return false
+
+        val supportLegAlsoWantsToMove = supportLeg.wantsBipedStep()
+        if (supportLegAlsoWantsToMove && supportLeg.timeSinceStopMove > leg.timeSinceStopMove) return false
+
+        return true
+    }
+
+    private fun Leg.wantsBipedStep(): Boolean {
+        return isOutsideTriggerZone || !touchingGround
     }
 }
 
