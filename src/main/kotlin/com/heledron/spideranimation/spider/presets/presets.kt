@@ -97,3 +97,72 @@ fun octoBot(segmentCount: Int, segmentLength: Double): SpiderOptions {
     applyMechanicalLegModel(options.bodyPlan)
     return options
 }
+
+fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
+    val options = SpiderOptions()
+    val legSegmentCount = segmentCount.coerceAtLeast(4)
+
+    options.bodyPlan.bodyModel = SpiderTorsoModels.BOXY.model.clone()
+    options.bodyPlan.addLegPair(
+        root = Vector(.32, -.52, -.05),
+        rest = Vector(.82, .0, -.06),
+        segments = createRobotSegments(legSegmentCount, .78 * segmentLength)
+    )
+
+    applyMechanicalLegModel(options.bodyPlan)
+    applyHeavyMechStyle(options.bodyPlan)
+
+    options.bodyPlan.eyePalette = AnimatedPalettes.MECH_EYES.palette
+    options.bodyPlan.blinkingPalette = AnimatedPalettes.MECH_BLINKING_LIGHTS.palette
+
+    options.walkGait.maxSpeed = .11
+    options.walkGait.moveAcceleration = .15 / 6
+    options.walkGait.legMoveSpeed = .22
+    options.walkGait.stationary.bodyHeight = 1.55
+    options.walkGait.moving.bodyHeight = 1.45
+    options.walkGait.comfortZone = options.walkGait.comfortZone.scale(1.2)
+
+    options.gallopGait.maxSpeed = .28
+    options.gallopGait.moveAcceleration = .15 / 5
+    options.gallopGait.legMoveSpeed = .36
+    options.gallopGait.stationary.bodyHeight = 1.55
+    options.gallopGait.moving.bodyHeight = 1.7
+    options.gallopGait.comfortZone = options.gallopGait.comfortZone.scale(1.2)
+
+    options.bodyPlan.scale(1.25)
+
+    return options
+}
+
+private fun applyHeavyMechStyle(bodyPlan: BodyPlan) {
+    val blackArmor = Material.BLACK_CONCRETE.createBlockData()
+    val redArmor = Material.RED_CONCRETE.createBlockData()
+    val darkMetal = Material.NETHERITE_BLOCK.createBlockData()
+    val purpleLight = Material.PURPLE_CONCRETE.createBlockData()
+    val orangeLight = Material.ORANGE_CONCRETE.createBlockData()
+
+    bodyPlan.bodyModel.pieces.forEachIndexed { index, piece ->
+        piece.block = when {
+            piece.tags.contains("eye") -> purpleLight
+            piece.tags.contains("blinking_lights") -> if (index % 2 == 0) purpleLight else orangeLight
+            piece.tags.contains("cloak") -> if (index % 3 == 0) redArmor else blackArmor
+            piece.tags.contains("torso") && index % 5 == 0 -> redArmor
+            else -> piece.block
+        }
+    }
+
+    bodyPlan.legs.forEachIndexed { legIndex, leg ->
+        leg.segments.forEachIndexed { segmentIndex, segment ->
+            segment.model.scale(1.45f, 1.45f, 1.0f)
+            segment.model.pieces.forEachIndexed { pieceIndex, piece ->
+                piece.block = when {
+                    piece.tags.contains("cloak") -> if ((legIndex + segmentIndex + pieceIndex) % 2 == 0) redArmor else blackArmor
+                    piece.tags.contains("tip") -> darkMetal
+                    piece.tags.contains("base") -> darkMetal
+                    piece.tags.contains("leg") && (segmentIndex + pieceIndex) % 4 == 0 -> redArmor
+                    else -> piece.block
+                }
+            }
+        }
+    }
+}

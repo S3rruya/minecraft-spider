@@ -390,12 +390,13 @@ fun setupCommands(plugin: SpiderAnimationPlugin) {
             "quadbot" to ::quadBot,
             "hexbot" to ::hexBot,
             "octobot" to ::octoBot,
+            "mech" to ::mech,
         )
 
         setExecutor { sender, _, _, args ->
             val name = args.getOrNull(0) ?: return@setExecutor false
 
-            val segmentCount = args.getOrNull(1)?.toIntOrNull() ?: if (name.contains("bot")) 4 else 3
+            val segmentCount = args.getOrNull(1)?.toIntOrNull() ?: if (name.contains("bot") || name == "mech") 4 else 3
             val segmentLength = args.getOrNull(2)?.toDoubleOrNull() ?: 1.0
 
             val createPreset = presets[name]
