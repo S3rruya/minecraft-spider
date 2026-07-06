@@ -31,7 +31,21 @@ fun setupItems() {
     val spiderComponent = CustomItemComponent("spider")
     customItemRegistry += { createNamedItem(Material.NETHERITE_INGOT, "Spider").attach(spiderComponent) }
     spiderComponent.onGestureUse { player, _ ->
-        if (AppState.findSpiderForPlayer(player) != null) {
+        val existingSpider = AppState.findSpiderForPlayer(player)
+        if (player.isSneaking) {
+            if (existingSpider == null) {
+                player.world.playSound(player.position, Sound.BLOCK_DISPENSER_FAIL, 1.0f, 1.5f)
+                player.sendActionBar(Component.text("You do not have a spider"))
+                return@onGestureUse
+            }
+
+            player.world.playSound(player.position, Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 1.0f, 0.0f)
+            existingSpider.first.remove()
+            player.sendActionBar(Component.text("Spider removed"))
+            return@onGestureUse
+        }
+
+        if (existingSpider != null) {
             player.world.playSound(player.position, Sound.BLOCK_DISPENSER_FAIL, 1.0f, 1.5f)
             player.sendActionBar(Component.text("You already have a spider"))
             return@onGestureUse
