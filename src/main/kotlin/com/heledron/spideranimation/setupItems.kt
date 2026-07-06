@@ -21,14 +21,11 @@ import com.heledron.spideranimation.utilities.overloads.direction
 import com.heledron.spideranimation.utilities.overloads.eyePosition
 import com.heledron.spideranimation.utilities.overloads.playSound
 import com.heledron.spideranimation.utilities.overloads.position
-import com.heledron.spideranimation.utilities.persistence.UUIDDataType
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.UUID
 import kotlin.math.roundToInt
 
 
@@ -36,26 +33,15 @@ fun setupItems() {
     val spiderComponent = CustomItemComponent("spider")
     customItemRegistry += { createNamedItem(Material.NETHERITE_INGOT, "Spider").attach(spiderComponent) }
     spiderComponent.onGestureUse { player, item ->
-        val existing = AppState.findNearestOwnedSpider(player)
-        if (existing != null) {
-			player.world.playSound(player.position, Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 1.0f, 0.0f)
-			existing.first.remove()
-			item.spiderUUID = null
-			player.sendActionBar(Component.text("Spider removed"))
-		} else {
-			val yawIncrements = 45.0f
-			val yaw = (player.yaw / yawIncrements).roundToInt() * yawIncrements
+        val yawIncrements = 45.0f
+        val yaw = (player.yaw / yawIncrements).roundToInt() * yawIncrements
 
-			val hitPosition = player.world.raycastGround(player.eyePosition, player.direction, 100.0)?.hitPosition ?: return@onGestureUse
+        val hitPosition = player.world.raycastGround(player.eyePosition, player.direction, 100.0)?.hitPosition ?: return@onGestureUse
 
-            item.spiderUUID = null
-			player.world.playSound(hitPosition, Sound.BLOCK_NETHERITE_BLOCK_PLACE, 1.0f, 1.0f)
-			val entity = AppState.createSpider(hitPosition.toLocation(player.world).apply { this.yaw = yaw }, hexBot(4, 1.0), player)
-			val spider = entity.query<SpiderBody>() ?: return@onGestureUse
-			item.spiderUUID = spider.uuid
+        player.world.playSound(hitPosition, Sound.BLOCK_NETHERITE_BLOCK_PLACE, 1.0f, 1.0f)
+        AppState.createSpider(hitPosition.toLocation(player.world).apply { this.yaw = yaw }, hexBot(4, 1.0), player)
 
-			player.sendActionBar(Component.text("Spider created"))
-		}
+        player.sendActionBar(Component.text("Spider created"))
 
     }
 
@@ -220,19 +206,3 @@ fun setupItems() {
         }
     }
 }
-
-private val SPIDER_UUID_KEY = namespacedID("spider_uuid")
-
-private var ItemStack.spiderUUID
-    get(): UUID? {
-        return itemMeta?.persistentDataContainer?.get(SPIDER_UUID_KEY, UUIDDataType)
-    }
-    set(value) {
-        val meta = itemMeta
-        if (value == null) {
-            meta.persistentDataContainer.remove(SPIDER_UUID_KEY)
-        } else {
-            meta.persistentDataContainer.set(SPIDER_UUID_KEY, UUIDDataType, value)
-        }
-        itemMeta = meta
-    }

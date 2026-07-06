@@ -39,7 +39,7 @@ fun splay(spiderEntity: ECSEntity) {
 
     // detach and get entities
     val entities = mutableListOf<BlockDisplay>()
-    for ((id, entity) in RenderEntityTracker.getAll()) {
+    for ((id, entity) in RenderEntityTracker.getAllByRoot(spider.uuid)) {
         if (entity !is BlockDisplay) continue
         entities += entity
         RenderEntityTracker.detach(id)

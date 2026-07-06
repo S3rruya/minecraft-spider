@@ -49,11 +49,11 @@ fun setupRenderer(app: ECS) {
             if (renderer.useParticles) {
                 SpiderParticleRenderer.renderSpider(spider)
             } else {
-                renderSpider(spider, cloak).submit(spider)
+                renderSpider(spider, cloak).submit(spider.uuid)
             }
 
 
-            if (renderer.renderDebugVisuals) spiderDebugRenderEntities(spider, pointDetector).submit(spider to "debug")
+            if (renderer.renderDebugVisuals) spiderDebugRenderEntities(spider, pointDetector).submit(spider.uuid to "debug")
         }
     }
 }

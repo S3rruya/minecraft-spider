@@ -110,7 +110,7 @@ fun setupMountable(app: ECS) {
                 update = {
                     mountable.currentPig = it
                 }
-            ).submit(spider to "mountable.pig")
+            ).submit(spider.uuid to "mountable.pig")
 
             RenderEntity(
                 clazz = ArmorStand::class.java,
@@ -132,7 +132,7 @@ fun setupMountable(app: ECS) {
                     // https://jd.papermc.io/paper/1.21/io/papermc/paper/entity/TeleportFlag.EntityState.html
                     runCommandSilently("execute as ${it.uniqueId} at @s run tp ${markerLocation.x} ${markerLocation.y} ${markerLocation.z}")
                 }
-            ).submit(spider to "mountable.marker")
+            ).submit(spider.uuid to "mountable.marker")
         }
     }
 }

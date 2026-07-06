@@ -104,6 +104,16 @@ object RenderEntityTracker {
         return rendered.toList()
     }
 
+    fun getAllByRoot(root: Any): List<Pair<Any, Entity>> {
+        return rendered.toList().filter { (handle, _) -> hasRoot(handle, root) }
+    }
+
+    private fun hasRoot(handle: Any?, root: Any): Boolean {
+        if (handle == root) return true
+        if (handle !is Pair<*, *>) return false
+        return hasRoot(handle.first, root)
+    }
+
     fun <T : Entity>put(handle: Any, entity: T): T {
         @Suppress("UNCHECKED_CAST")
         rendered.putIfAbsent(handle, entity)

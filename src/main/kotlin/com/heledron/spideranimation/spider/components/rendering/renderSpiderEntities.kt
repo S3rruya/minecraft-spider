@@ -15,7 +15,7 @@ fun renderSpider(spider: SpiderBody, cloak: Cloak): RenderGroup {
     val group = RenderGroup()
 
     val transform = Matrix4f().rotate(spider.orientation)
-    group[spider] = renderModel(spider, cloak, spider.position, spider.bodyPlan.bodyModel, transform)
+    group["body"] = renderModel(spider, cloak, spider.position, spider.bodyPlan.bodyModel, transform)
 
 
     for ((legIndex, leg) in spider.legs.withIndex()) {
