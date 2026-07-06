@@ -432,25 +432,34 @@ fun setupCommands(plugin: SpiderAnimationPlugin) {
         }
     }
 
-//    getCommand("scale").setExecutor { sender, _, _, args ->
-//        val scale = args[0].toDoubleOrNull()
-//
-//        if (scale == null) {
-//            sender.sendMessage("Usage: /spider:scale <scale>")
-//            return@setExecutor true
-//        }
-//
-//        val oldScale = AppState.options.bodyPlan.scale
-//        AppState.options.scale(scale / oldScale)
-//
-//        plugin.writeAndSaveConfig()
-//
-//        AppState.recreateSpider()
-//
-//        sender.sendMessage("Set scale to $scale")
-//
-//        return@setExecutor true
-//    }
+    getCommand("scale").setExecutor { sender, _, _, args ->
+        val scale = args.getOrNull(0)?.toDoubleOrNull()
+
+        if (scale == null || scale <= 0.0) {
+            sender.sendMessage("Usage: /spider:scale <scale>")
+            return@setExecutor true
+        }
+
+        val senderLocation = locationFromSender(sender) ?: AppState.target ?: run {
+            sender.sendMessage("No location found")
+            return@setExecutor true
+        }
+
+        val (_, spider) = findSpiderForSender(sender, senderLocation) ?: run {
+            sender.sendMessage("No spider found")
+            return@setExecutor true
+        }
+
+        val scaleFactor = scale / spider.bodyPlan.scale
+        spider.walkGait.scale(scaleFactor)
+        spider.gallopGait.scale(scaleFactor)
+        spider.bodyPlan.scale(scaleFactor)
+        spider.legs = emptyList()
+
+        sender.sendMessage("Set spider scale to $scale")
+
+        return@setExecutor true
+    }
 
 //    getCommand("items").setExecutor { sender, _, _, _ ->
 //        val player = sender as? org.bukkit.entity.Player ?: return@setExecutor true

@@ -2,7 +2,6 @@ package com.heledron.spideranimation
 
 import com.heledron.spideranimation.AppState.ecs
 import com.heledron.spideranimation.kinematic_chain_visualizer.KinematicChainVisualizer
-import com.heledron.spideranimation.spider.components.body.SpiderBody
 import com.heledron.spideranimation.spider.components.Cloak
 import com.heledron.spideranimation.spider.components.PointDetector
 import com.heledron.spideranimation.spider.components.rendering.SpiderRenderer
@@ -14,7 +13,6 @@ import com.heledron.spideranimation.utilities.custom_items.attach
 import com.heledron.spideranimation.utilities.custom_items.createNamedItem
 import com.heledron.spideranimation.utilities.custom_items.customItemRegistry
 import com.heledron.spideranimation.utilities.ecs.ECSEntity
-import com.heledron.spideranimation.utilities.namespacedID
 import com.heledron.spideranimation.utilities.raycastGround
 import com.heledron.spideranimation.utilities.events.onTick
 import com.heledron.spideranimation.utilities.overloads.direction
@@ -32,7 +30,13 @@ import kotlin.math.roundToInt
 fun setupItems() {
     val spiderComponent = CustomItemComponent("spider")
     customItemRegistry += { createNamedItem(Material.NETHERITE_INGOT, "Spider").attach(spiderComponent) }
-    spiderComponent.onGestureUse { player, item ->
+    spiderComponent.onGestureUse { player, _ ->
+        if (AppState.findSpiderForPlayer(player) != null) {
+            player.world.playSound(player.position, Sound.BLOCK_DISPENSER_FAIL, 1.0f, 1.5f)
+            player.sendActionBar(Component.text("You already have a spider"))
+            return@onGestureUse
+        }
+
         val yawIncrements = 45.0f
         val yaw = (player.yaw / yawIncrements).roundToInt() * yawIncrements
 

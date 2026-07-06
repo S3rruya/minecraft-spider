@@ -32,10 +32,11 @@ class Mountable {
 
 fun setupMountable(app: ECS) {
     onInteractEntity { player, entity, hand ->
-        for (mountable in app.query<Mountable>()) {
+        for ((spiderEntity, mountable) in app.query<ECSEntity, Mountable>()) {
             val currentPig = mountable.currentPig ?: continue
             if (entity != currentPig) continue
             if (hand != EquipmentSlot.HAND) continue
+            if (!spiderEntity.canBeControlledBy(player)) continue
 
             // if right click with saddle, add saddle (automatic)
             if (player.inventory.itemInMainHand.type == Material.SADDLE && !currentPig.hasSaddle()) {
@@ -55,12 +56,16 @@ fun setupMountable(app: ECS) {
     addEventListener(object : Listener {
         @EventHandler
         fun onMount(event: VehicleEnterEvent) {
-            for (mountable in app.query<Mountable>()) {
+            for ((spiderEntity, mountable) in app.query<ECSEntity, Mountable>()) {
                 val currentPig = mountable.currentPig ?: continue
                 val currentMarker = mountable.currentMarker ?: continue
 
                 if (event.vehicle != currentPig) continue
-                val player = event.entered
+                val player = event.entered as? Player
+                if (player == null || !spiderEntity.canBeControlledBy(player)) {
+                    event.isCancelled = true
+                    continue
+                }
 
                 event.isCancelled = true
                 currentMarker.addPassenger(player)
@@ -135,4 +140,9 @@ fun setupMountable(app: ECS) {
             ).submit(spider.uuid to "mountable.marker")
         }
     }
+}
+
+private fun ECSEntity.canBeControlledBy(player: Player): Boolean {
+    val owner = query<SpiderOwner>() ?: return true
+    return owner.playerId == player.uniqueId
 }

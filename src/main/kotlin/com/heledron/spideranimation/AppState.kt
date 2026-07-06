@@ -26,6 +26,11 @@ object AppState {
     var target: Location? = null
 
     fun createSpider(location: Location, options: SpiderOptions, owner: Player? = null): ECSEntity {
+        if (owner != null) {
+            val existing = findNearestOwnedSpider(owner)
+            if (existing != null) return existing.first
+        }
+
         val spawnLocation = location.clone()
         spawnLocation.y += options.walkGait.stationary.bodyHeight
 
@@ -49,15 +54,21 @@ object AppState {
     }
 
     fun findSpiderForPlayer(player: Player): Pair<ECSEntity, SpiderBody>? {
-        return findNearestOwnedSpider(player) ?: findNearestUnownedSpider(player.location)
+        return findNearestOwnedSpider(player)
     }
 
     fun findNearestOwnedSpider(player: Player): Pair<ECSEntity, SpiderBody>? {
         val location = player.location
-        return ecs.query<ECSEntity, SpiderBody, SpiderOwner>()
-            .filter { (_, spider, owner) -> owner.playerId == player.uniqueId && spider.world == location.world }
+        val ownedSpiders = ecs.query<ECSEntity, SpiderBody, SpiderOwner>()
+            .filter { (_, _, owner) -> owner.playerId == player.uniqueId }
+            .toList()
+
+        val selectedSpider = ownedSpiders
+            .filter { (_, spider, _) -> spider.world == location.world }
             .minByOrNull { (_, spider, _) -> spider.position.distanceSquared(location.toVector()) }
-            ?.let { (entity, spider, _) -> entity to spider }
+            ?: ownedSpiders.firstOrNull()
+
+        return selectedSpider?.let { (entity, spider, _) -> entity to spider }
     }
 
     fun findNearestUnownedSpider(location: Location): Pair<ECSEntity, SpiderBody>? {
