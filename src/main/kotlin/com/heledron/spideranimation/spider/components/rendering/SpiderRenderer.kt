@@ -3,6 +3,7 @@ package com.heledron.spideranimation.spider.components.rendering
 import com.heledron.spideranimation.spider.components.body.SpiderBody
 import com.heledron.spideranimation.spider.components.Cloak
 import com.heledron.spideranimation.spider.components.PointDetector
+import com.heledron.spideranimation.utilities.BlockDisplayModelPiece
 import com.heledron.spideranimation.utilities.ecs.ECS
 import com.heledron.spideranimation.utilities.events.interval
 import org.bukkit.Location
@@ -19,9 +20,9 @@ fun setupRenderer(app: ECS) {
     // apply eye blinking effect
     interval(0,10) {
         for (spider in app.query<SpiderBody>()) {
-            val pieces = spider.bodyPlan.bodyModel.pieces.filter { it.tags.contains("eye") }
+            val pieces = modelPieces(spider).filter { it.tags.contains("eye") }
 
-            if (Random.nextBoolean()) return@interval
+            if (Random.nextBoolean()) continue
             for (piece in pieces) {
                 val block = spider.bodyPlan.eyePalette.random()
                 piece.block = block.first
@@ -33,9 +34,9 @@ fun setupRenderer(app: ECS) {
     // apply blinking lights effect
     interval(0,5) {
         for (spider in app.query<SpiderBody>()) {
-            val pieces = spider.bodyPlan.bodyModel.pieces.filter { it.tags.contains("blinking_lights") }
+            val pieces = modelPieces(spider).filter { it.tags.contains("blinking_lights") }
 
-            if (Random.nextBoolean()) return@interval
+            if (Random.nextBoolean()) continue
             for (piece in pieces) {
                 val block = spider.bodyPlan.blinkingPalette.random()
                 piece.block = block.first
@@ -55,6 +56,12 @@ fun setupRenderer(app: ECS) {
 
             if (renderer.renderDebugVisuals) spiderDebugRenderEntities(spider, pointDetector).submit(spider.uuid to "debug")
         }
+    }
+}
+
+private fun modelPieces(spider: SpiderBody): List<BlockDisplayModelPiece> {
+    return spider.bodyPlan.bodyModel.pieces + spider.bodyPlan.legs.flatMap { leg ->
+        leg.segments.flatMap { segment -> segment.model.pieces }
     }
 }
 

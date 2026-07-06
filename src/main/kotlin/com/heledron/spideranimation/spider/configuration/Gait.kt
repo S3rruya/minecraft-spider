@@ -65,6 +65,7 @@ class Gait(
             disableAdvancedRotation = true
             scanPivotMode = PivotMode.YAxis
             legChainPivotMode = PivotMode.YAxis
+            legStraightenRotation = (-10f).toRadians()
             polygonLeeway = .35
             stabilizationFactor = .35
         }
@@ -86,6 +87,7 @@ class Gait(
             disableAdvancedRotation = true
             scanPivotMode = PivotMode.YAxis
             legChainPivotMode = PivotMode.YAxis
+            legStraightenRotation = (-10f).toRadians()
             polygonLeeway = .45
             stabilizationFactor = .45
             uncomfortableSpeedMultiplier = .45

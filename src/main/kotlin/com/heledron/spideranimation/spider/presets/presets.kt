@@ -101,17 +101,16 @@ fun octoBot(segmentCount: Int, segmentLength: Double): SpiderOptions {
 
 fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
     val options = SpiderOptions()
-    val legSegmentCount = segmentCount.coerceAtLeast(4)
+    val legLengthScale = segmentLength * (segmentCount.coerceAtLeast(4).toDouble() / 4.0)
 
-    options.bodyPlan.bodyModel = SpiderTorsoModels.BOXY.model.clone()
+    options.bodyPlan.bodyModel = HumanoidMechModels.body()
     options.bodyPlan.addLegPair(
-        root = Vector(.32, -.52, -.05),
-        rest = Vector(.82, .0, -.06),
-        segments = createRobotSegments(legSegmentCount, .78 * segmentLength)
+        root = Vector(.34, -.64, .02),
+        rest = Vector(.42, .0, .22),
+        segments = HumanoidMechModels.legSegments(legLengthScale)
     )
 
-    applyMechanicalLegModel(options.bodyPlan)
-    applyHeavyMechStyle(options.bodyPlan)
+    HumanoidMechModels.applyLegModels(options.bodyPlan)
 
     options.bodyPlan.eyePalette = AnimatedPalettes.MECH_EYES.palette
     options.bodyPlan.blinkingPalette = AnimatedPalettes.MECH_BLINKING_LIGHTS.palette
@@ -119,7 +118,7 @@ fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
     options.walkGait = Gait.defaultBipedWalk()
     options.gallopGait = Gait.defaultBipedRun()
 
-    options.bodyPlan.scale(1.25)
+    options.bodyPlan.scale(1.15)
 
     return options
 }

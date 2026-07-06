@@ -9,6 +9,8 @@ import com.heledron.spideranimation.utilities.rendering.RenderGroup
 import org.bukkit.util.Vector
 import org.joml.Matrix4f
 import org.joml.Vector4f
+import kotlin.math.abs
+import kotlin.math.sin
 
 
 fun renderSpider(spider: SpiderBody, cloak: Cloak): RenderGroup {
@@ -67,7 +69,7 @@ private fun renderModelPiece(
         it.interpolationDuration = 1
     },
     update = {
-        val transform = Matrix4f(transformation).mul(piece.transform)
+        val transform = Matrix4f(transformation).mul(animatedModelPieceTransform(spider, piece))
         it.interpolateTransform(transform)
 
         val cloak = if (piece.tags.contains("cloak")) {
@@ -89,3 +91,67 @@ private fun renderModelPiece(
         }
     }
 )
+
+private fun animatedModelPieceTransform(spider: SpiderBody, piece: BlockDisplayModelPiece): Matrix4f {
+    val animation = humanoidMechAnimation(spider, piece) ?: return Matrix4f(piece.transform)
+    return animation.mul(piece.transform)
+}
+
+private fun humanoidMechAnimation(spider: SpiderBody, piece: BlockDisplayModelPiece): Matrix4f? {
+    if (!piece.tags.contains("humanoid_mech")) return null
+    val modelScale = spider.bodyPlan.scale.toFloat()
+
+    if (piece.tags.contains("humanoid_head")) {
+        val idleYaw = sin(spider.world.fullTime.toFloat() * 0.07f) * 0.04f
+        return pivotRotation(0f, 1.14f * modelScale, 0.06f * modelScale)
+            .rotateY(idleYaw)
+            .translate(0f, -1.14f * modelScale, -0.06f * modelScale)
+    }
+
+    if (!piece.tags.contains("humanoid_arm")) return null
+
+    val side = when {
+        piece.tags.contains("left") -> 1f
+        piece.tags.contains("right") -> -1f
+        else -> return null
+    }
+
+    val speedFraction = if (spider.gait.maxSpeed <= 0.0) {
+        0f
+    } else {
+        (spider.velocity.horizontalLength() / spider.gait.maxSpeed).coerceIn(0.0, 1.0).toFloat()
+    }
+
+    val movement = if (spider.isWalking) speedFraction.coerceAtLeast(0.35f) else speedFraction
+    val phaseSpeed = if (spider.gallop) 0.58f else 0.38f
+    val phase = sin(spider.world.fullTime.toFloat() * phaseSpeed)
+    val shoulderSwing = phase * side * 0.48f * movement
+
+    val shoulderX = 0.82f * side * modelScale
+    val shoulderY = 0.78f * modelScale
+    val shoulderZ = 0.02f * modelScale
+    val shoulder = pivotRotation(shoulderX, shoulderY, shoulderZ)
+        .rotateX(shoulderSwing)
+        .translate(-shoulderX, -shoulderY, -shoulderZ)
+
+    if (piece.tags.contains("upper_arm") || piece.tags.contains("elbow")) {
+        return shoulder
+    }
+
+    if (piece.tags.contains("lower_arm") || piece.tags.contains("hand")) {
+        val elbowBend = (0.12f + abs(phase) * 0.22f) * movement
+        val elbowX = 0.93f * side * modelScale
+        val elbowY = 0.18f * modelScale
+        val elbowZ = 0.10f * modelScale
+        val elbow = pivotRotation(elbowX, elbowY, elbowZ)
+            .rotateX(elbowBend)
+            .translate(-elbowX, -elbowY, -elbowZ)
+        return shoulder.mul(elbow)
+    }
+
+    return null
+}
+
+private fun pivotRotation(x: Float, y: Float, z: Float): Matrix4f {
+    return Matrix4f().translate(x, y, z)
+}
