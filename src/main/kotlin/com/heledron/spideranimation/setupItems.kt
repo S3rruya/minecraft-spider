@@ -6,6 +6,7 @@ import com.heledron.spideranimation.spider.components.body.SpiderBody
 import com.heledron.spideranimation.spider.components.Cloak
 import com.heledron.spideranimation.spider.components.PointDetector
 import com.heledron.spideranimation.spider.components.rendering.SpiderRenderer
+import com.heledron.spideranimation.spider.components.SpiderOwner
 import com.heledron.spideranimation.spider.presets.hexBot
 import com.heledron.spideranimation.laser.LaserPoint
 import com.heledron.spideranimation.utilities.custom_items.CustomItemComponent
@@ -38,6 +39,12 @@ fun setupItems() {
         val storedUuid = item.spiderUUID
 		val existing = if (storedUuid == null) null else AppState.findSpiderByUUID(storedUuid)
 		if (existing != null) {
+            val owner = existing.first.query<SpiderOwner>()
+            if (owner != null && owner.playerId != player.uniqueId) {
+                player.sendActionBar(Component.text("This spider belongs to another player"))
+                return@onGestureUse
+            }
+
 			player.world.playSound(player.position, Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 1.0f, 0.0f)
 			existing.first.remove()
 			item.spiderUUID = null
@@ -49,7 +56,7 @@ fun setupItems() {
 			val hitPosition = player.world.raycastGround(player.eyePosition, player.direction, 100.0)?.hitPosition ?: return@onGestureUse
 
 			player.world.playSound(hitPosition, Sound.BLOCK_NETHERITE_BLOCK_PLACE, 1.0f, 1.0f)
-			val entity = AppState.createSpider(hitPosition.toLocation(player.world).apply { this.yaw = yaw }, hexBot(4, 1.0))
+			val entity = AppState.createSpider(hitPosition.toLocation(player.world).apply { this.yaw = yaw }, hexBot(4, 1.0), player)
 			val spider = entity.query<SpiderBody>() ?: return@onGestureUse
 			item.spiderUUID = spider.uuid
 
@@ -63,21 +70,25 @@ fun setupItems() {
     customItemRegistry += { createNamedItem(Material.SHEARS, "Toggle Leg").attach(disableLegComponent) }
     onTick {
         val players = disableLegComponent.getPlayersHoldingItem().toSet()
-        for (pointDetector in AppState.ecs.query<PointDetector>()) {
-            pointDetector.checkPlayers = players
+        for ((entity, pointDetector) in AppState.ecs.query<ECSEntity, PointDetector>()) {
+            val ownerId = entity.query<SpiderOwner>()?.playerId
+            pointDetector.checkPlayers = if (ownerId == null) {
+                players
+            } else {
+                players.filter { it.uniqueId == ownerId }.toSet()
+            }
         }
     }
     disableLegComponent.onGestureUse { player, _ ->
-        for (pointDetector in AppState.ecs.query<PointDetector>()) {
-            val selectedLeg = pointDetector.selectedLeg[player]
-            if (selectedLeg == null) {
-                player.world.playSound(player.position, Sound.BLOCK_DISPENSER_FAIL, 1.0f, 2.0f)
-                return@onGestureUse
-            }
-
-            selectedLeg.isDisabled = !selectedLeg.isDisabled
-            player.world.playSound(player.position, Sound.BLOCK_LANTERN_PLACE, 1.0f, 1.0f)
+        val pointDetector = AppState.findSpiderForPlayer(player)?.first?.query<PointDetector>()
+        val selectedLeg = pointDetector?.selectedLeg?.get(player)
+        if (selectedLeg == null) {
+            player.world.playSound(player.position, Sound.BLOCK_DISPENSER_FAIL, 1.0f, 2.0f)
+            return@onGestureUse
         }
+
+        selectedLeg.isDisabled = !selectedLeg.isDisabled
+        player.world.playSound(player.position, Sound.BLOCK_LANTERN_PLACE, 1.0f, 1.0f)
     }
 
     val toggleDebugComponent = CustomItemComponent("toggleDebug")
@@ -97,7 +108,7 @@ fun setupItems() {
     val switchRendererComponent = CustomItemComponent("switchRenderer")
     customItemRegistry += { createNamedItem(Material.LIGHT_BLUE_DYE, "Switch Renderer").attach(switchRendererComponent) }
     switchRendererComponent.onGestureUse { player, _ ->
-        val renderer = AppState.findNearestSpider(player)?.first?.query<SpiderRenderer>() ?: return@onGestureUse
+        val renderer = AppState.findSpiderForPlayer(player)?.first?.query<SpiderRenderer>() ?: return@onGestureUse
         renderer.useParticles = !renderer.useParticles
 
         if (renderer.useParticles) {
@@ -110,7 +121,7 @@ fun setupItems() {
     val toggleCloakComponent = CustomItemComponent("toggleCloak")
     customItemRegistry += { createNamedItem(Material.GREEN_DYE, "Toggle Cloak").attach(toggleCloakComponent) }
     toggleCloakComponent.onGestureUse { player, _ ->
-        val (cloak, entity) = AppState.findNearestSpider(player)?.let { (e, _) ->
+        val (cloak, entity) = AppState.findSpiderForPlayer(player)?.let { (e, _) ->
             val c = e.query<Cloak>() ?: return@onGestureUse
             c to e
         } ?: return@onGestureUse
@@ -138,7 +149,7 @@ fun setupItems() {
     val switchGaitComponent = CustomItemComponent("switchGait")
     customItemRegistry += { createNamedItem(Material.BREEZE_ROD, "Switch Gait").attach(switchGaitComponent) }
     switchGaitComponent.onGestureUse { player, _ ->
-        val spider = AppState.findNearestSpider(player)?.second ?: return@onGestureUse
+        val spider = AppState.findSpiderForPlayer(player)?.second ?: return@onGestureUse
         spider.gallop = !spider.gallop
         player.world.playSound(player.position, Sound.BLOCK_DISPENSER_FAIL, 1.0f, 2.0f)
         player.sendActionBar(Component.text(if (!spider.gallop) "Walk mode" else "Gallop mode"))
@@ -172,6 +183,7 @@ fun setupItems() {
                 existing.second.world = player.world
                 existing.second.position = position
                 existing.second.isVisible = isVisible
+                existing.second.ownerId = player.uniqueId
                 existing.third.expired = false
             } else {
                 // create new laser
@@ -181,6 +193,7 @@ fun setupItems() {
                         world = player.world,
                         position = position,
                         isVisible = isVisible,
+                        ownerId = player.uniqueId,
                     )
                 )
             }

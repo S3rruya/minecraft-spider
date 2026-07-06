@@ -19,13 +19,14 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Display
 import org.bukkit.util.RayTraceResult
 import org.bukkit.util.Vector
+import java.util.UUID
 import java.util.WeakHashMap
 
 class CloakDamageEvent(val entity: ECSEntity, val spider: SpiderBody, val cloak: Cloak)
 
 class CloakToggleEvent(val entity: ECSEntity, val spider: SpiderBody)
 
-class Cloak(var options: CloakOptions) {
+class Cloak(var options: CloakOptions, var ownerId: UUID? = null) {
     var active = false
     private var cloakColor = WeakHashMap<Any, Oklab>()
     private var cloakOverride = WeakHashMap<Any, BlockData>()
@@ -56,7 +57,12 @@ class Cloak(var options: CloakOptions) {
         }
 
         fun cast(): RayTraceResult? {
-            val targetPlayer = Bukkit.getOnlinePlayers().firstOrNull() ?: return groundCast()
+            val targetPlayer = ownerId
+                ?.let { Bukkit.getPlayer(it) }
+                ?: Bukkit.getOnlinePlayers().firstOrNull()
+                ?: return groundCast()
+
+            if (targetPlayer.world != world) return groundCast()
 
             val direction = position.clone().subtract(targetPlayer.eyePosition)
             return world.raycastGround(position, direction, 30.0)

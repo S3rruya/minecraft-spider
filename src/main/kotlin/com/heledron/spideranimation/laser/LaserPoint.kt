@@ -3,6 +3,7 @@ package com.heledron.spideranimation.laser
 import com.heledron.spideranimation.utilities.rendering.renderBlock
 import com.heledron.spideranimation.kinematic_chain_visualizer.KinematicChainVisualizer
 import com.heledron.spideranimation.spider.components.SpiderBehaviour
+import com.heledron.spideranimation.spider.components.SpiderOwner
 import com.heledron.spideranimation.spider.components.TargetBehaviour
 import com.heledron.spideranimation.spider.components.body.SpiderBody
 import com.heledron.spideranimation.utilities.ecs.ECS
@@ -12,11 +13,13 @@ import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Display
 import org.bukkit.util.Vector
+import java.util.UUID
 
 class LaserPoint(
     var world: World,
     var position: Vector,
     var isVisible: Boolean,
+    var ownerId: UUID? = null,
 )
 
 fun setupLaserPointer(app: ECS) {
@@ -25,8 +28,10 @@ fun setupLaserPointer(app: ECS) {
 
         // get spiders to follow the laser
         for ((spiderEntity, spider) in app.query<ECSEntity, SpiderBody>()) {
+            val ownerId = spiderEntity.query<SpiderOwner>()?.playerId
             val nearestLaser = lasers
                 .filter { it.world == spider.world }
+                .filter { ownerId == null || it.ownerId == ownerId }
                 .minByOrNull { it.position.distanceSquared(spider.position) }
                 ?: continue
 

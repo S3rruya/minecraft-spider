@@ -409,7 +409,7 @@ fun setupCommands(plugin: SpiderAnimationPlugin) {
 				return@setExecutor true
 			}
 			
-			val (entity, oldSpider) = AppState.findNearestSpider(senderLocation) ?: run {
+			val (entity, oldSpider) = findSpiderForSender(sender, senderLocation) ?: run {
 				sender.sendMessage("No spider found")
 				return@setExecutor true
 			}
@@ -517,7 +517,7 @@ fun setupCommands(plugin: SpiderAnimationPlugin) {
                 return@setExecutor true
             }
 
-            val spider = AppState.findNearestSpider(senderLocation)
+            val spider = findSpiderForSender(sender, senderLocation)
 
             val (entity, _) = spider ?: run {
                 sender.sendMessage("No spider found")
@@ -538,4 +538,15 @@ fun locationFromSender(sender: org.bukkit.command.CommandSender): org.bukkit.Loc
 		is org.bukkit.command.BlockCommandSender -> sender.block.location
 		else -> null
 	}
+}
+
+fun findSpiderForSender(
+    sender: org.bukkit.command.CommandSender,
+    location: org.bukkit.Location,
+): Pair<ECSEntity, SpiderBody>? {
+    return if (sender is Player) {
+        AppState.findSpiderForPlayer(sender)
+    } else {
+        AppState.findNearestSpider(location)
+    }
 }
