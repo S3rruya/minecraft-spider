@@ -104,10 +104,17 @@ fun mech(segmentCount: Int, segmentLength: Double): SpiderOptions {
     val legLengthScale = segmentLength * (segmentCount.coerceAtLeast(4).toDouble() / 4.0)
 
     options.bodyPlan.bodyModel = HumanoidMechModels.body()
-    options.bodyPlan.addLegPair(
-        root = Vector(.30, -.42, .02),
-        rest = Vector(.34, .0, .12),
-        segments = HumanoidMechModels.legSegments(legLengthScale)
+    options.bodyPlan.legs = listOf(
+        LegPlan(
+            attachmentPosition = Vector(.40, -.38, .02),
+            restPosition = Vector(.56, .0, .10),
+            segments = HumanoidMechModels.legSegments(legLengthScale, side = 1.0),
+        ),
+        LegPlan(
+            attachmentPosition = Vector(-.40, -.38, .02),
+            restPosition = Vector(-.56, .0, .10),
+            segments = HumanoidMechModels.legSegments(legLengthScale, side = -1.0),
+        ),
     )
 
     HumanoidMechModels.applyLegModels(options.bodyPlan)

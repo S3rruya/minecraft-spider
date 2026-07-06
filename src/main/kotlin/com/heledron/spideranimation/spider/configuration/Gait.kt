@@ -49,19 +49,19 @@ class Gait(
         }
 
         fun defaultBipedWalk() = Gait(.11, GaitType.BIPED).apply {
-            stationary.bodyHeight = 2.2
-            stationary.triggerZone = SplitDistance(.32, 2.2)
-            moving.bodyHeight = 2.12
-            moving.triggerZone = SplitDistance(.72, 2.25)
-            maxBodyDistanceFromGround = .55
+            stationary.bodyHeight = 2.35
+            stationary.triggerZone = SplitDistance(.30, 2.35)
+            moving.bodyHeight = 2.28
+            moving.triggerZone = SplitDistance(.62, 2.4)
+            maxBodyDistanceFromGround = .68
             moveAcceleration = .15 / 6
             legMoveSpeed = .24
-            legLiftHeight = .34
-            legDropDistance = .20
-            comfortZone = SplitDistance(1.05, 2.45)
-            bodyHeightCorrectionAcceleration = gravityAcceleration * 7
-            bodyHeightCorrectionFactor = .4
-            legLookAheadFraction = .65
+            legLiftHeight = .30
+            legDropDistance = .18
+            comfortZone = SplitDistance(.95, 2.6)
+            bodyHeightCorrectionAcceleration = gravityAcceleration * 9
+            bodyHeightCorrectionFactor = .55
+            legLookAheadFraction = .5
             samePairCooldown = 4
             crossPairCooldown = 6
             disableAdvancedRotation = true
@@ -73,19 +73,19 @@ class Gait(
         }
 
         fun defaultBipedRun() = Gait(.28, GaitType.BIPED).apply {
-            stationary.bodyHeight = 2.2
-            stationary.triggerZone = SplitDistance(.32, 2.2)
-            moving.bodyHeight = 2.25
-            moving.triggerZone = SplitDistance(.92, 2.35)
-            maxBodyDistanceFromGround = .6
+            stationary.bodyHeight = 2.35
+            stationary.triggerZone = SplitDistance(.30, 2.35)
+            moving.bodyHeight = 2.4
+            moving.triggerZone = SplitDistance(.78, 2.5)
+            maxBodyDistanceFromGround = .72
             moveAcceleration = .15 / 5
             legMoveSpeed = .34
-            legLiftHeight = .42
-            legDropDistance = .24
-            comfortZone = SplitDistance(1.25, 2.55)
-            bodyHeightCorrectionAcceleration = gravityAcceleration * 8
-            bodyHeightCorrectionFactor = .45
-            legLookAheadFraction = .8
+            legLiftHeight = .36
+            legDropDistance = .20
+            comfortZone = SplitDistance(1.05, 2.7)
+            bodyHeightCorrectionAcceleration = gravityAcceleration * 10
+            bodyHeightCorrectionFactor = .6
+            legLookAheadFraction = .65
             samePairCooldown = 3
             crossPairCooldown = 5
             disableAdvancedRotation = true

@@ -47,11 +47,12 @@ object HumanoidMechModels {
         return DisplayModel(pieces)
     }
 
-    fun legSegments(lengthScale: Double): List<SegmentPlan> {
+    fun legSegments(lengthScale: Double, side: Double): List<SegmentPlan> {
+        val outward = side.coerceIn(-1.0, 1.0)
         return listOf(
-            SegmentPlan(0.16 * lengthScale, direction(0.0, -0.45, 0.12)),
-            SegmentPlan(0.66 * lengthScale, direction(0.0, -0.98, 0.18)),
-            SegmentPlan(0.70 * lengthScale, direction(0.0, -0.99, -0.08)),
+            SegmentPlan(0.15 * lengthScale, direction(outward * 0.08, -0.45, 0.10)),
+            SegmentPlan(0.63 * lengthScale, direction(outward * 0.18, -0.98, 0.12)),
+            SegmentPlan(0.68 * lengthScale, direction(outward * -0.10, -0.99, -0.05)),
             SegmentPlan(0.30 * lengthScale, direction(0.0, -0.08, 0.98)),
         )
     }
