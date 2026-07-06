@@ -36,15 +36,8 @@ fun setupItems() {
     val spiderComponent = CustomItemComponent("spider")
     customItemRegistry += { createNamedItem(Material.NETHERITE_INGOT, "Spider").attach(spiderComponent) }
     spiderComponent.onGestureUse { player, item ->
-        val storedUuid = item.spiderUUID
-		val existing = if (storedUuid == null) null else AppState.findSpiderByUUID(storedUuid)
-		if (existing != null) {
-            val owner = existing.first.query<SpiderOwner>()
-            if (owner != null && owner.playerId != player.uniqueId) {
-                player.sendActionBar(Component.text("This spider belongs to another player"))
-                return@onGestureUse
-            }
-
+        val existing = AppState.findNearestOwnedSpider(player)
+        if (existing != null) {
 			player.world.playSound(player.position, Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 1.0f, 0.0f)
 			existing.first.remove()
 			item.spiderUUID = null
@@ -55,6 +48,7 @@ fun setupItems() {
 
 			val hitPosition = player.world.raycastGround(player.eyePosition, player.direction, 100.0)?.hitPosition ?: return@onGestureUse
 
+            item.spiderUUID = null
 			player.world.playSound(hitPosition, Sound.BLOCK_NETHERITE_BLOCK_PLACE, 1.0f, 1.0f)
 			val entity = AppState.createSpider(hitPosition.toLocation(player.world).apply { this.yaw = yaw }, hexBot(4, 1.0), player)
 			val spider = entity.query<SpiderBody>() ?: return@onGestureUse
